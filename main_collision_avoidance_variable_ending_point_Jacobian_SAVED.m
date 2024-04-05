@@ -321,7 +321,7 @@ dYf = odes_function_flux(tau_f,Yf);
 lambdaf  = [Yf(7:11),Yf(13)];
 dxf      = [dYf(1) , dYf(3) , dYf(4) , dYf(5) , dYf(6) , dYf(12)]';      % theta is not considered
 
-
+days_f   = t(end)*days; 
 alphaf   = Yf(3);
 
 % % p=0.1N, sucess,constriant of alpha: [pi/2-15deg , pi/2+15deg] 
@@ -329,7 +329,10 @@ alphaf   = Yf(3);
 
 
 
-Hf       = 1 + lambdaf*dxf + kappa*max(0 , (probdot - v_threshold/(days * 86400))) + kappa_alpha*max(0 , (abs(alphaf - pi/2) - deg2rad(5))); % sucess
+% Hf       = 1 + lambdaf*dxf + kappa*max(0 , (probdot - v_threshold/(days * 86400))) + kappa_alpha*max(0 , (abs(alphaf - pi/2) - deg2rad(5))); % sucess
+
+
+Hf       = 1 + lambdaf*dxf + kappa*max(0 , (probdot - v_threshold/(days_f * 86400))) + kappa_alpha*max(0 , (abs(alphaf - pi/2) - deg2rad(5))); % sucess
 
 
 
