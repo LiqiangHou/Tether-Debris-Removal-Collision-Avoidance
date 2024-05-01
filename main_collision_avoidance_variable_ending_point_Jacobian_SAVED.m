@@ -1,4 +1,4 @@
-function main_collision_avoidance_variable_ending_point_Jacobian
+function main_collision_avoidance_variable_ending_point_Jacobian_save
 
 clear all;
 close all;
@@ -13,13 +13,8 @@ format long g;
 MATRIX_A = eye(7 , 7)*1.0e-13;
 
 
-
-
-
-
-
 % constant paramters
-dayszero = 0.12;    % p=0.10;
+dayszero = 0.12;    
 initialize_parameter(dayszero);
 
 p0       = diag( [0.001 0.001 0.001 0.001 0.001 0.001 0.001]*1.0e-0);
@@ -29,7 +24,7 @@ self.tau = [0.0 , 1.0];
 
 % bounds of expected vlaue of the initila costate
 daysmin  = 0.02;
-daysmax  = 0.30;    % p=0.10
+daysmax  = 0.30;    
 
 lb      = [ones(1,6) * -10   daysmin];
 ub      = [ones(1,6) *  10   daysmax];
@@ -74,25 +69,13 @@ options      = optimoptions('fmincon','Algorithm','sqp','Display','iter',...
                         'StepTolerance',1.0e-30,'OptimalityTolerance',1.0e-30,...
                         'MaxFunctionEvaluations',20000,'OutputFcn',@outfun);   
 
-% [xoptm,fval] = fmincon(fun,x0,A,b,Aeq,beq,lb,ub,nonlcon,options);
 [xoptm,fval] = fmincon(fun,x_s_0,A,b,Aeq,beq,x_s_lb,x_s_ub,nonlcon,options);
 
 
-%%%
 
+% x0: optimal initial value of cosctate
+% x0 = [     -0.000843663892999919     -0.000843663892999919     -0.000843663892999919     -0.000843663892999919     -0.000843663892999919            0.196889010407           0.1474294752341];
 
-
-
-% testfy the solutions
-tspan = [0, 1];
-
-atol = 1.0e-14;
-rtol = 1.0e-14;
-
-options = odeset('RelTol',rtol,'AbsTol',atol,...
-                 'Events',[]);
-
-sol  = ode113(@odes_function_flux, tspan, xoptm,options);
 
 return
 end
@@ -131,9 +114,8 @@ m12=m1*m2/m;
 l1= l*m2/m;
 
 
-% p=0.025;    
-
-p=0.10;       % test case of 0.1N thrust 
+% test case of 0.1N thrust 
+p=0.10;       
 
 ISP = 3000;
 
@@ -286,9 +268,6 @@ global max_delta_alpha
 %x(13)=lambda_mass
 
 % initial value of state and costate of the ode, 
-% x0: optimal initial value of cosctate
-
-% x0 = [     -0.000843663892999919     -0.000843663892999919     -0.000843663892999919     -0.000843663892999919     -0.000843663892999919            0.196889010407           0.1474294752341];
 y0   = [r0bar theta0 alfa0 u0bar v0bar w0bar x0(1) x0(2) x0(3) x0(4) x0(5) m1 x0(6)];
 days = x0(7);
 
@@ -324,24 +303,14 @@ dxf      = [dYf(1) , dYf(3) , dYf(4) , dYf(5) , dYf(6) , dYf(12)]';      % theta
 days_f   = t(end)*days; 
 alphaf   = Yf(3);
 
-% % p=0.1N, sucess,constriant of alpha: [pi/2-15deg , pi/2+15deg] 
-% Hf       = 1 + lambdaf*dxf + kappa*max(0 , (probdot - v_threshold/(days * 86400))) + kappa_alpha*max(0 , (abs(alphaf - pi/2) - deg2rad(15))); % sucess
-
-
-
-% Hf       = 1 + lambdaf*dxf + kappa*max(0 , (probdot - v_threshold/(days * 86400))) + kappa_alpha*max(0 , (abs(alphaf - pi/2) - deg2rad(5))); % sucess
-
+% constriant of alpha: [90-5deg , 90+5deg]
+% constriant of collsion probability:  1.0e-4
 
 Hf       = 1 + lambdaf*dxf + kappa*max(0 , (probdot - v_threshold/(days_f * 86400))) + kappa_alpha*max(0 , (abs(alphaf - pi/2) - deg2rad(5))); % sucess
 
 
 
-
-
-
-
-
-% % Final Condition
+% Terminal boundary condition
 ceq  = [
 Yf(8)  - lambdaf_alfa
 Yf(11) - lambdaf_wbar
@@ -354,7 +323,7 @@ Yf(13)                     % lambda_massf
 
 
 
-if(Yf(1) < 0.95)
+if(Yf(1) < 0.90)
     disp(ceq);
 end
 
@@ -490,6 +459,3 @@ tf
 
 return
 end
-
-
-
