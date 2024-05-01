@@ -1,2 +1,4 @@
-This program is designed for the variable endding point transfer. However, a fxied transistion matrix is used to propagate the covariance. In the new edition, improvement will made to the propagation to tackle thorougly the problem of the variable ending point boudnary problem. 
+Program of the debris removal using a space tug and a tether considering collision probability. 
+
+
 -- Liqiang Hou 
