@@ -14,7 +14,6 @@ MATRIX_A = eye(7 , 7)*1.0e-13;
 
 
 % constant paramters
-dayszero = 0.12;    
 initialize_parameter(dayszero);
 
 p0       = diag( [0.001 0.001 0.001 0.001 0.001 0.001 0.001]*1.0e-0);
@@ -23,6 +22,7 @@ self.p0  = p0;
 self.tau = [0.0 , 1.0];
 
 % bounds of expected vlaue of the initila costate
+dayszero = 0.12;    
 daysmin  = 0.02;
 daysmax  = 0.30;    
 
