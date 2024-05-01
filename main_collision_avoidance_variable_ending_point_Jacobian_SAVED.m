@@ -14,6 +14,7 @@ MATRIX_A = eye(7 , 7)*1.0e-13;
 
 
 % constant paramters
+dayszero = 0.12;    
 initialize_parameter(dayszero);
 
 p0       = diag( [0.001 0.001 0.001 0.001 0.001 0.001 0.001]*1.0e-0);
@@ -22,7 +23,6 @@ self.p0  = p0;
 self.tau = [0.0 , 1.0];
 
 % bounds of expected vlaue of the initila costate
-dayszero = 0.12;    
 daysmin  = 0.02;
 daysmax  = 0.30;    
 
@@ -275,19 +275,18 @@ tf =24*3600*days; % Days in seconds
 %
 tspan   = [0 , 1] ;
 
-
-
 atol = 1.0e-6;
 rtol = 1.0e-6;
 
 
 options = odeset('RelTol',rtol,'AbsTol',atol,'Events',@RfEvents);
-% options = odeset('RelTol',rtol,'AbsTol',atol,'Events',[]);
+
 %              
 [t,Y]   = ode113(@odes_function_flux, tspan, y0,options);
 
 Yf = Y(end,:);
-% final condition of Hamiltonian
+
+% flux and probability
 [flux,flux_partial]=flux_valueandpartial_2d(Yf(1),fitflux, fitfgrad) ;
 prob    = 1 - exp(-flux * area_c * days);
 probdot = 1 - exp(-flux * area_c);
@@ -300,8 +299,8 @@ dxf      = [dYf(1) , dYf(3) , dYf(4) , dYf(5) , dYf(6) , dYf(12)]';      % theta
 days_f   = t(end)*days; 
 alphaf   = Yf(3);
 
-% constriant of alpha: [90-5deg , 90+5deg]
-% constriant of collsion probability:  1.0e-4
+% Hamilton
+% constriant of alpha: [90-5deg , 90+5deg], constriant of collsion probability:  1.0e-4
 
 Hf       = 1 + lambdaf*dxf + kappa*max(0 , (probdot - v_threshold/(days_f * 86400))) + kappa_alpha*max(0 , (abs(alphaf - pi/2) - deg2rad(5))); 
 
@@ -381,78 +380,3 @@ J = (Mu - M) * pinv(SIGMA + A, 1.0e-20) * (Mu - M)' + trace(pinv(SIGMA + A, 1.0e
 return
 end
 
-
-
-
-function plot_results(sol)
-
-global v0 u0 l l1 tf m12 m m2 p m1 r0 mu r0bar u0bar v0bar theta0 alfa0 w0bar ufbar lambdaf_ubar ...
-lambdaf_alfa alfaf lambdaf_wbar wfbar
-
-
-
-% result structure of the ODE
-Z     = deval(sol,tau);
-
-r_sol     = Z(1,:)*r0; % Radius [km]
-theta_sol = Z(2,:); % Radial component of velocity [km/s]
-alfa_sol  = Z(3,:); % Tangential component of velocity [km/s]
-u_sol     = Z(4,:)*v0*r0;
-v_sol     = Z(5,:)*v0;
-w_sol     = Z(6,:)*v0;
-lambda_rbar_sol = Z(7,:);
-lambda_alfa_sol = Z(8,:);
-lambda_ubar_sol = Z(9,:);
-lambda_vbar_sol = Z(10,:);
-lambda_wbar_sol = Z(11,:);
-
-%%plot and results
-final_radius = r_sol(end)
-final_theta = theta_sol(end);
-X = r_sol.*cos(theta_sol);
-Y = r_sol.*sin(theta_sol);
-time = tau*(tf);
-
-beta = atand((lambda_ubar_sol./r0 +...
-lambda_wbar_sol.*m2.*sin(alfa_sol)./(m12.*l))./(lambda_wbar_sol.*m2.*cos(alfa_sol)./(m12*l)...
-    +lambda_wbar_sol./(r0.*r_sol)-lambda_vbar_sol./(r0.*r_sol)));
-A = alfa_sol;
-beta1 = asind ((lambda_ubar_sol./r0 ...
-    +lambda_wbar_sol.*m2.*sin(alfa_sol)./(m12.*l))./(((lambda_ubar_sol./r0 ...
-    +lambda_wbar_sol.*m2.*sin(alfa_sol)./(m12.*l)).^2+(lambda_wbar_sol.*m2.*cos(alfa_sol)./(m12*l)...
-+lambda_wbar_sol./(r0.*r_sol)-lambda_vbar_sol./(r0.*r_sol)).^2).^0.5));
-
-figure(1)
-plot(X,Y,'k')
-xlabel('x-direction [km]','fontsize',14)
-ylabel('y-direction [km]','fontsize',14)
-title('Trajectory of the Tethered System','fontsize',16)
-axis equal
-hold on
-plot(0,0,'k.','MarkerSize',20)
-plot(r0*cos(theta0),r0*sin(theta0),'-.rx','MarkerSize',10)
-plot(final_radius*cos(final_theta),final_radius*sin(final_theta),'-.ro','MarkerSize',10)
-% figure(3)
-% plot(X1,Y1)
-figure(2)
-plot(time/period,beta1,'k')
-xlabel('time [number of inital period]','fontsize',14)
-ylabel('Thrust Angle [deg]','fontsize',14)
-title('Thrust Angle Vs Time','fontsize',16)
-figure(3)
-plot(time/period,A*180/pi,'k')
-xlabel('time [number of inital period]','fontsize',14)
-ylabel('Tether Angle [deg]','fontsize',14)
-title('Tether Angle Vs Time','fontsize',16)
-figure(4)
-plot(time/period,beta,'k')
-xlabel('time [number of inital period]','fontsize',14)
-ylabel('Thrust Angle [deg]','fontsize',14)
-title('Thrust Angle Vs Time','fontsize',16)
-tf
-
-
-
-
-return
-end
