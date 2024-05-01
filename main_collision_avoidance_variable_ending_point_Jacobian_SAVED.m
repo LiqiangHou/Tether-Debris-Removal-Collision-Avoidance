@@ -29,19 +29,16 @@ daysmax  = 0.30;
 lb      = [ones(1,6) * -10   daysmin];
 ub      = [ones(1,6) *  10   daysmax];
 
+
+% the second part of design variables: varaiance of the costate
 s_lb = 1.0e-8 * [ones(1,7)];
 s_ub = 5.0e2  * [ones(1,7)];
 
+s_0 = [5.0e-1*ones(1,4) , 0.10e-1, 0.10e-1, 0.10e-1];     
 
 
 
-s_0 = [5.0e-1*ones(1,4) , 0.10e-1, 0.10e-1, 0.10e-1];     % 0.017
-
-
-
-
-
-%
+% objective function with convolution
 fun = @Obj_Convolution;
 
 A   = [];
@@ -50,7 +47,7 @@ Aeq = [];
 beq = [];
 nonlcon = [];
 
-% the  second set of the value to optimized: expected value and variance of the boundaries 
+% Jocabian of the guesses  
 x0  = [ones(1,6)*0.1 , dayszero];
 
 
@@ -58,7 +55,7 @@ SIGMA =  Jacobian_Covariance(0,1,x0);
 
 
 
-%
+% Design variables: Initial guesses and their variance 
 
 x_s_0 =  [x0 , s_0];
 x_s_lb = [lb , s_lb];
