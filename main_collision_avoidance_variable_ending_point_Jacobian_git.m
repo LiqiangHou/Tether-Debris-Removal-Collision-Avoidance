@@ -1,4 +1,4 @@
-function main_collision_avoidance_variable_ending_point_Jacobian_git
+function main_tether_debris_removal_collision_avoidance_git
 
 clear all;
 close all;
@@ -30,7 +30,7 @@ lb      = [ones(1,6) * -10   daysmin];
 ub      = [ones(1,6) *  10   daysmax];
 
 
-% the second part of design variables: varaiance of the costate
+% the second part of design variables: varaiance of the terminal boundary
 s_lb = 1.0e-8 * [ones(1,7)];
 s_ub = 5.0e2  * [ones(1,7)];
 
@@ -48,14 +48,12 @@ beq = [];
 nonlcon = [];
 
 % Jocabian of the guesses  
-x0  = [ones(1,6)*0.1 , dayszero];
-
-
-SIGMA =  Jacobian_Covariance(0,1,x0);
+x0     = [ones(1,6)*0.1 , dayszero];
+SIGMA  =  Jacobian_Covariance(0,1,x0);
 
 
 
-% Design variables: Initial guesses and their variance 
+% Design variables: Initial guesses and varaiance of the terminal boundary
 
 x_s_0 =  [x0 , s_0];
 x_s_lb = [lb , s_lb];
